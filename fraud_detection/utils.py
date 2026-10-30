@@ -1,4 +1,5 @@
-import __main__
+import builtins
+import sys
 import joblib
 import pandas as pd
 import math
@@ -156,15 +157,15 @@ class FraudDetector:
 # Load existing trained detector
 # ============================================================
 
-# The existing pickle was created when FraudDetector
-# existed in __main__. We make that old reference resolve
-# to this class before loading the pickle.
-
-setattr(__main__, "FraudDetector", FraudDetector)
-
 BASE_DIR = Path(__file__).resolve().parent
-
 MODEL_PATH = BASE_DIR / "fraud_detection.pkl"
+
+# 1. Use setattr on builtins to avoid static type-checker warnings
+setattr(builtins, "FraudDetector", FraudDetector)
+
+# 2. Bind FraudDetector to __main__ dynamically for active Streamlit threads
+if "__main__" in sys.modules:
+    setattr(sys.modules["__main__"], "FraudDetector", FraudDetector)
 
 detector = joblib.load(MODEL_PATH)
 
